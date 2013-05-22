@@ -5,12 +5,14 @@ import ch.julien.common.delegate.EqualityComparator;
 import ch.julien.common.delegate.Func;
 import ch.julien.common.delegate.Predicate;
 import ch.julien.common.monad.Option;
+import ch.julien.query.Lookup;
 import org.junit.Test;
 
 import java.util.*;
 
 import static java.util.Arrays.asList;
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.fest.assertions.api.Assertions.entry;
 
 public class TraversableImplTests {
 	private static class Person {
@@ -206,6 +208,217 @@ public class TraversableImplTests {
 	}
 
 	@Test
+	public void testAsArray() {
+		List<Integer> integers = asList(1, 2);
+
+		Integer[] actual = from(integers).asArray(
+			new Func<Integer, Integer[]>() {
+				@Override
+				public Integer[] invoke(Integer arg) {
+					return new Integer[arg];
+				}
+			}
+		);
+
+		assertThat(actual).containsExactly(1, 2);
+	}
+
+	@Test
+	public void testAsArrayList() {
+		List<Integer> integers = asList(1, 2);
+
+		ArrayList<Integer> actual = from(integers).asArrayList();
+
+		assertThat(actual).containsExactly(1, 2);
+	}
+
+	@Test
+	public void testAsCollection() {
+		List<Integer> integers = asList(1, 2);
+
+		LinkedList<Integer> actual = from(integers).asCollection(new LinkedList<Integer>());
+
+		assertThat(actual).containsExactly(1, 2);
+	}
+
+	@Test
+	public void testAsHashMap() {
+		Person leeloo = Person.withFirstAndLastName("leeloo", "dallas");
+		Person korban = Person.withFirstAndLastName("korban", "dallas");
+
+		List<Person> persons = asList(leeloo, korban);
+
+		HashMap<String, Person> actual = from(persons).asHashMap(
+			new Func<Person, String>() {
+				@Override
+				public String invoke(Person arg) {
+					return arg.firstName;
+				}
+			}
+		);
+
+		assertThat(actual).contains(entry(leeloo.firstName, leeloo));
+		assertThat(actual).contains(entry(korban.firstName, korban));
+	}
+
+	@Test
+	public void testAsHashMapWithElementSelector() {
+		List<Integer> integers = asList(1, 2);
+
+		HashMap<Integer, String> actual = from(integers).asHashMap(
+			new Func<Integer, Integer>() {
+				@Override
+				public Integer invoke(Integer arg) {
+					return arg;
+				}
+			},
+			new Func<Integer, String>() {
+				@Override
+				public String invoke(Integer arg) {
+					return arg.toString();
+				}
+			}
+		);
+
+		assertThat(actual).contains(entry(1, "1"));
+		assertThat(actual).contains(entry(2, "2"));
+	}
+
+	@Test
+	public void testAsHashSet() {
+		List<Integer> integers = asList(1, 2);
+
+		HashSet<Integer> actual = from(integers).asHashSet();
+
+		assertThat(actual).containsExactly(1, 2);
+	}
+
+	@Test
+	public void testAsHashSetWithKeySelector() {
+		Person leeloo = Person.withFirstAndLastName("leeloo", "dallas");
+		Person korban = Person.withFirstAndLastName("korban", "dallas");
+
+		List<Person> persons = asList(leeloo, korban);
+
+		HashSet<String> actual = from(persons).asHashSet(
+			new Func<Person, String>() {
+				@Override
+				public String invoke(Person arg) {
+					return arg.firstName;
+				}
+			}
+		);
+
+		assertThat(actual).containsExactly(leeloo.firstName, korban.firstName);
+	}
+
+	@Test
+	public void testAsLookup() {
+		List<Integer> integers = asList(1, 2, 3, 1, 3, 3);
+
+		Lookup<Integer, Integer> actual = from(integers).asLookup(
+			new Func<Integer, Integer>() {
+				@Override
+				public Integer invoke(Integer arg) {
+					return arg;
+				}
+			}
+		);
+
+		assertThat(actual).hasSize(3);
+		assertThat(actual.getItems(1)).containsExactly(1, 1);
+		assertThat(actual.getItems(2)).containsExactly(2);
+		assertThat(actual.getItems(3)).containsExactly(3, 3, 3);
+	}
+
+	@Test
+	public void testAsLookupWithEqualityComparator() {
+		Person leeloo1 = Person.withFirstAndLastName("leeloo", "dallas");
+		Person leeloo2 = Person.withFirstAndLastName("leeloo", "multipass");
+		Person korban = Person.withFirstAndLastName("korban", "dallas");
+
+		List<Person> persons = asList(leeloo1, leeloo2, korban);
+
+		Lookup<Person, Person> actual = from(persons).asLookup(
+			new Func<Person, Person>() {
+				@Override
+				public Person invoke(Person arg) {
+					return arg;
+				}
+			},
+			new EqualityComparator<Person>() {
+				@Override
+				public boolean equals(Person first, Person second) {
+					return first.firstName.equals(second.firstName);
+				}
+			}
+		);
+
+		assertThat(actual).hasSize(2);
+		assertThat(actual.getItems(leeloo1)).containsExactly(leeloo1, leeloo2);
+		assertThat(actual.getItems(leeloo2)).containsExactly(leeloo1, leeloo2);
+		assertThat(actual.getItems(korban)).containsExactly(korban);
+	}
+
+	@Test
+	public void testAsLookupWithElementSelector() {
+		Person leeloo1 = Person.withFirstAndLastName("leeloo", "dallas");
+		Person leeloo2 = Person.withFirstAndLastName("leeloo", "multipass");
+		Person korban = Person.withFirstAndLastName("korban", "dallas");
+
+		List<Person> persons = asList(leeloo1, leeloo2, korban);
+
+		Lookup<String, Person> actual = from(persons).asLookup(
+			new Func<Person, String>() {
+				@Override
+				public String invoke(Person arg) {
+					return arg.firstName;
+				}
+			},
+			new Func<Person, Person>() {
+				@Override
+				public Person invoke(Person arg) {
+					return arg;
+				}
+			}
+		);
+
+		assertThat(actual).hasSize(2);
+		assertThat(actual.getItems("leeloo")).containsExactly(leeloo1, leeloo2);
+		assertThat(actual.getItems("korban")).containsExactly(korban);
+	}
+
+	@Test
+	public void testConcatListOfSameType() {
+		List<Integer> first = asList(1, 2);
+		List<Integer> second = asList(3, 4);
+
+		Iterable<Integer> actual = from(first).concat(second);
+
+		assertThat(actual).containsExactly(1, 2, 3, 4);
+	}
+
+	@Test
+	public void testConcatListOfSameBaseType() {
+		List<Number> first = Arrays.<Number>asList(1L, 2L);
+		List<Integer> second = asList(3, 4);
+
+		Iterable<Number> actual = from(first).concat(second);
+
+		assertThat(actual).containsExactly(1L, 2L, 3, 4);
+	}
+
+	@Test
+	public void testConcatArray() {
+		List<Integer> first = asList(1, 2);
+		Integer[] second = {3, 4};
+
+		Iterable<Integer> actual = from(first).concat(second);
+
+		assertThat(actual).containsExactly(1, 2, 3, 4);
+	}
+
+	@Test
 	public void testCountFromListIsGreaterThanZero() {
 		List<Integer> integers = asList(1, 2);
 
@@ -270,33 +483,33 @@ public class TraversableImplTests {
 	}
 
 	@Test
-	public void testConcatListOfSameType() {
-		List<Integer> first = asList(1, 2);
-		List<Integer> second = asList(3, 4);
+	public void testDifference() {
+		List<Integer> a = asList(1, 2, 3, 4);
+		List<Integer> b = asList(4, 5, 6, 1);
 
-		Iterable<Integer> actual = from(first).concat(second);
+		Iterable<Integer> actual = from(a).difference(b);
 
-		assertThat(actual).containsExactly(1, 2, 3, 4);
+		assertThat(actual).containsExactly(2, 3);
 	}
 
 	@Test
-	public void testConcatListOfSameBaseType() {
-		List<Number> first = Arrays.<Number>asList(1L, 2L);
-		List<Integer> second = asList(3, 4);
+	public void testDifferenceWhereSelfIsBiggerThanOther() {
+		List<Integer> a = asList(1, 2, 3, 4, 1, 4);
+		List<Integer> b = asList(4, 5, 6, 1);
 
-		Iterable<Number> actual = from(first).concat(second);
+		Iterable<Integer> actual = from(a).difference(b);
 
-		assertThat(actual).containsExactly(1L, 2L, 3, 4);
+		assertThat(actual).containsExactly(2, 3);
 	}
 
 	@Test
-	public void testConcatArray() {
-		List<Integer> first = asList(1, 2);
-		Integer[] second = {3, 4};
+	public void testDifferenceWhereSelfIsSmallerThanOther() {
+		List<Integer> a = asList(2, 3);
+		List<Integer> b = asList(4, 5, 6, 1);
 
-		Iterable<Integer> actual = from(first).concat(second);
+		Iterable<Integer> actual = from(a).difference(b);
 
-		assertThat(actual).containsExactly(1, 2, 3, 4);
+		assertThat(actual).containsExactly(2, 3);
 	}
 
 	@Test
@@ -387,6 +600,36 @@ public class TraversableImplTests {
 		);
 
 		assertThat(actual).containsExactly('a', 'b', 'c', 'a', 'b', 'b');
+	}
+
+	@Test
+	public void testIntersect() {
+		List<Integer> a = asList(1, 2, 3, 4);
+		List<Integer> b = asList(4, 5, 6, 1);
+
+		Iterable<Integer> actual = from(a).intersect(b);
+
+		assertThat(actual).containsExactly(1, 4);
+	}
+
+	@Test
+	public void testIntersectWhereSelfIsBiggerThanOther() {
+		List<Integer> a = asList(1, 2, 3, 4, 1, 8, 9);
+		List<Integer> b = asList(4, 5, 6, 1);
+
+		Iterable<Integer> actual = from(a).intersect(b);
+
+		assertThat(actual).containsExactly(1, 4);
+	}
+
+	@Test
+	public void testIntersectWhereSelfIsSmallerThanOther() {
+		List<Integer> a = asList(1, 4);
+		List<Integer> b = asList(4, 5, 6, 1);
+
+		Iterable<Integer> actual = from(a).intersect(b);
+
+		assertThat(actual).containsExactly(1, 4);
 	}
 
 	@Test
@@ -600,6 +843,22 @@ public class TraversableImplTests {
 		);
 
 		assertThat(actual).containsExactly(1, 2, 3, 4);
+	}
+
+	@Test
+	public void testSortByDescending() {
+		List<Integer> integers = asList(2, 4, 1, 3);
+
+		Iterable<Integer> actual = from(integers).sortByDescending(
+			new Func<Integer, Integer>() {
+				@Override
+				public Integer invoke(Integer arg) {
+					return arg;
+				}
+			}
+		);
+
+		assertThat(actual).containsExactly(4, 3, 2, 1);
 	}
 
 	@Test
