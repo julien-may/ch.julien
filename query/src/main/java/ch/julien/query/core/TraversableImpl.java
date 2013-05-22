@@ -437,7 +437,7 @@ class TraversableImpl<TSource> implements Traversable<TSource> {
 			new Predicate<TSource>() {
 				@Override
 				public boolean invoke(TSource arg) {
-					return flags.containsKey(arg);
+					return flags.get(arg);
 				}
 			}
 		);
