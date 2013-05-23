@@ -4,10 +4,10 @@ import ch.julien.common.delegate.Func;
 
 import java.util.Comparator;
 
-public interface OrderedTraversable<T> extends Traversable<T> {
-	<TKey> OrderedTraversable<T> thenBy(Func<T, TKey> keySelector);
-	<TKey> OrderedTraversable<T> thenBy(Func<T, TKey> keySelector, Comparator<TKey> comparator);
+public interface OrderedTraversable<T, TKey> extends Traversable<T> {
+	OrderedTraversable<T, TKey> thenBy(Func<T, TKey> keySelector);
+	OrderedTraversable<T, TKey> thenBy(Func<T, TKey> keySelector, Comparator<TKey> comparator);
 
-	<TKey> OrderedTraversable<T> thenByDescending(Func<T, TKey> keySelector);
-	<TKey> OrderedTraversable<T> thenByDescending(Func<T, TKey> keySelector, Comparator<TKey> comparator);
+	OrderedTraversable<T, TKey> thenByDescending(Func<T, TKey> keySelector);
+	OrderedTraversable<T, TKey> thenByDescending(Func<T, TKey> keySelector, Comparator<TKey> comparator);
 }

@@ -66,11 +66,11 @@ public interface Traversable<T> extends Iterable<T> {
 	Traversable<T> skip(long count);
 	Traversable<T> take(long count);
 
-	<TKey> OrderedTraversable<T> sortBy(Func<T, TKey> keySelector);
-	<TKey> OrderedTraversable<T> sortBy(Func<T, TKey> keySelector, Comparator<TKey> comparator);
+	<TKey> OrderedTraversable<T, TKey> sortBy(Func<T, TKey> keySelector);
+	<TKey> OrderedTraversable<T, TKey> sortBy(Func<T, TKey> keySelector, Comparator<TKey> comparator);
 
-	<TKey> OrderedTraversable<T> sortByDescending(Func<T, TKey> keySelector);
-	<TKey> OrderedTraversable<T> sortByDescending(Func<T, TKey> keySelector, Comparator<TKey> comparator);
+	<TKey> OrderedTraversable<T, TKey> sortByDescending(Func<T, TKey> keySelector);
+	<TKey> OrderedTraversable<T, TKey> sortByDescending(Func<T, TKey> keySelector, Comparator<TKey> comparator);
 
 //	Traversable<Tuple<T, T>> zip(Iterable<T> other);
 //	Traversable<Tuple<T, T>> zipAll(Iterable<T> other);

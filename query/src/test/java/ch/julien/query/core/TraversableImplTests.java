@@ -846,6 +846,48 @@ public class TraversableImplTests {
 	}
 
 	@Test
+	public void testSortByString() {
+		List<Person> persons = asList(
+			Person.withFirstName("b"),
+			Person.withFirstName("a")
+		);
+
+		Iterable<Person> actual = from(persons).sortBy(
+			new Func<Person, String>() {
+				@Override
+				public String invoke(Person arg) {
+					return arg.firstName;
+				}
+			}
+		);
+
+		assertThat(actual).containsExactly(
+			Person.withFirstName("a"), Person.withFirstName("b")
+		);
+	}
+
+	@Test
+	public void testSortByStringAsArrayList() {
+		List<Person> persons = asList(
+			Person.withFirstName("b"),
+			Person.withFirstName("a")
+		);
+
+		List<Person> actual = from(persons).sortBy(
+			new Func<Person, String>() {
+				@Override
+				public String invoke(Person arg) {
+					return arg.firstName;
+				}
+			}
+		).asArrayList();
+
+		assertThat(actual).containsExactly(
+			Person.withFirstName("a"), Person.withFirstName("b")
+		);
+	}
+
+	@Test
 	public void testSortByDescending() {
 		List<Integer> integers = asList(2, 4, 1, 3);
 

@@ -565,23 +565,23 @@ class TraversableImpl<TSource> implements Traversable<TSource> {
 	}
 
 	@Override
-	public <TKey> OrderedTraversable<TSource> sortBy(Func<TSource, TKey> keySelector) {
+	public <TKey> OrderedTraversable<TSource, TKey> sortBy(Func<TSource, TKey> keySelector) {
 		return sortBy(keySelector, null);
 	}
 
 	@Override
-	public <TKey> OrderedTraversable<TSource> sortBy(Func<TSource, TKey> keySelector, Comparator<TKey> comparator) {
-		return new OrderedTraversableImpl<TSource, TKey>(this, keySelector, comparator, false);
+	public <TKey> OrderedTraversable<TSource, TKey> sortBy(Func<TSource, TKey> keySelector, Comparator<TKey> comparator) {
+		return OrderedTraversableImpl.create(this, keySelector, comparator, false);
 	}
 
 	@Override
-	public <TKey> OrderedTraversable<TSource> sortByDescending(Func<TSource, TKey> keySelector) {
+	public <TKey> OrderedTraversable<TSource, TKey> sortByDescending(Func<TSource, TKey> keySelector) {
 		return sortByDescending(keySelector, null);
 	}
 
 	@Override
-	public <TKey> OrderedTraversable<TSource> sortByDescending(Func<TSource, TKey> keySelector, Comparator<TKey> comparator) {
-		return new OrderedTraversableImpl<TSource, TKey>(this, keySelector, comparator, true);
+	public <TKey> OrderedTraversable<TSource, TKey> sortByDescending(Func<TSource, TKey> keySelector, Comparator<TKey> comparator) {
+		return OrderedTraversableImpl.create(this, keySelector, comparator, true);
 	}
 
 	@Override
