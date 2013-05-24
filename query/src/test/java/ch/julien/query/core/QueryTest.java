@@ -13,7 +13,7 @@ import static java.util.Arrays.asList;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.fest.assertions.api.Assertions.entry;
 
-public class QueryTests {
+public class QueryTest {
 	@Test
 	public void testFromIterable() {
 		Traversable<Integer> actual = Query.from(asList(1, 2));

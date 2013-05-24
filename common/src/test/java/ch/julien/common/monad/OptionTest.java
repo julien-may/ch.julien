@@ -1,4 +1,4 @@
 package ch.julien.common.monad;
 
-public class OptionTests {
+public class OptionTest {
 }

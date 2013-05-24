@@ -14,7 +14,7 @@ import static java.util.Arrays.asList;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.fest.assertions.api.Assertions.entry;
 
-public class TraversableImplTests {
+public class TraversableImplTest {
 	private static class Person {
 		public static Person withFirstAndLastName(String firstName, String lastName) {
 			return new Person(firstName, lastName);
