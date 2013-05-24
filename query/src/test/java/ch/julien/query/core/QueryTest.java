@@ -1,17 +1,13 @@
 package ch.julien.query.core;
 
-import ch.julien.common.delegate.Predicate;
 import ch.julien.query.Traversable;
 import org.junit.Test;
 
-import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 
-import static ch.julien.query.core.Query.from;
 import static java.util.Arrays.asList;
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.fest.assertions.api.Assertions.entry;
 
 public class QueryTest {
 	@Test
