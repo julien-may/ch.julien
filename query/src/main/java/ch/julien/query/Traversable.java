@@ -1,5 +1,6 @@
 package ch.julien.query;
 
+import ch.julien.common.datastructure.Tuple;
 import ch.julien.common.delegate.*;
 import ch.julien.common.monad.Option;
 
@@ -27,12 +28,6 @@ public interface Traversable<T> extends Iterable<T> {
 
 	HashSet<T> asHashSet();
 	<TKey> HashSet<TKey> asHashSet(Func<T, TKey> keySelector);
-
-	<TKey> Lookup<TKey, T> asLookup(Func<T, TKey> keySelector);
-	<TKey> Lookup<TKey, T> asLookup(Func<T, TKey> keySelector, EqualityComparator<TKey> equalityComparator);
-	<TKey, TElement> Lookup<TKey, TElement> asLookup(Func<T, TKey> keySelector, Func<T, TElement> elementSelector);
-	<TKey, TElement> Lookup<TKey, TElement> asLookup(Func<T, TKey> keySelector, Func<T, TElement> elementSelector,
-		EqualityComparator<TKey> equalityComparator);
 
 	Traversable<T> concat(Iterable<? extends T> appendant);
 	Traversable<T> concat(T[] appendant);
@@ -72,6 +67,6 @@ public interface Traversable<T> extends Iterable<T> {
 	<TKey> OrderedTraversable<T, TKey> sortByDescending(Func<T, TKey> keySelector);
 	<TKey> OrderedTraversable<T, TKey> sortByDescending(Func<T, TKey> keySelector, Comparator<TKey> comparator);
 
-//	Traversable<Tuple<T, T>> zip(Iterable<T> other);
-//	Traversable<Tuple<T, T>> zipAll(Iterable<T> other);
+	<TOther> Traversable<Tuple<T, TOther>> zip(Iterable<TOther> other);
+	<TOther> Traversable<Tuple<T, TOther>> zipAll(Iterable<TOther> other);
 }

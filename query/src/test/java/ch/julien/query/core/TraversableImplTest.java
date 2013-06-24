@@ -1,11 +1,11 @@
 package ch.julien.query.core;
 
+import ch.julien.common.datastructure.Tuple;
 import ch.julien.common.delegate.Accumulator;
 import ch.julien.common.delegate.EqualityComparator;
 import ch.julien.common.delegate.Func;
 import ch.julien.common.delegate.Predicate;
 import ch.julien.common.monad.Option;
-import ch.julien.query.Lookup;
 import org.junit.Test;
 
 import java.util.*;
@@ -310,82 +310,6 @@ public class TraversableImplTest {
 		);
 
 		assertThat(actual).containsExactly(leeloo.firstName, korban.firstName);
-	}
-
-	@Test
-	public void testAsLookup() {
-		List<Integer> integers = asList(1, 2, 3, 1, 3, 3);
-
-		Lookup<Integer, Integer> actual = from(integers).asLookup(
-			new Func<Integer, Integer>() {
-				@Override
-				public Integer invoke(Integer arg) {
-					return arg;
-				}
-			}
-		);
-
-		assertThat(actual).hasSize(3);
-		assertThat(actual.getItems(1)).containsExactly(1, 1);
-		assertThat(actual.getItems(2)).containsExactly(2);
-		assertThat(actual.getItems(3)).containsExactly(3, 3, 3);
-	}
-
-	@Test
-	public void testAsLookupWithEqualityComparator() {
-		Person leeloo1 = Person.withFirstAndLastName("leeloo", "dallas");
-		Person leeloo2 = Person.withFirstAndLastName("leeloo", "multipass");
-		Person korban = Person.withFirstAndLastName("korban", "dallas");
-
-		List<Person> persons = asList(leeloo1, leeloo2, korban);
-
-		Lookup<Person, Person> actual = from(persons).asLookup(
-			new Func<Person, Person>() {
-				@Override
-				public Person invoke(Person arg) {
-					return arg;
-				}
-			},
-			new EqualityComparator<Person>() {
-				@Override
-				public boolean equals(Person first, Person second) {
-					return first.firstName.equals(second.firstName);
-				}
-			}
-		);
-
-		assertThat(actual).hasSize(2);
-		assertThat(actual.getItems(leeloo1)).containsExactly(leeloo1, leeloo2);
-		assertThat(actual.getItems(leeloo2)).containsExactly(leeloo1, leeloo2);
-		assertThat(actual.getItems(korban)).containsExactly(korban);
-	}
-
-	@Test
-	public void testAsLookupWithElementSelector() {
-		Person leeloo1 = Person.withFirstAndLastName("leeloo", "dallas");
-		Person leeloo2 = Person.withFirstAndLastName("leeloo", "multipass");
-		Person korban = Person.withFirstAndLastName("korban", "dallas");
-
-		List<Person> persons = asList(leeloo1, leeloo2, korban);
-
-		Lookup<String, Person> actual = from(persons).asLookup(
-			new Func<Person, String>() {
-				@Override
-				public String invoke(Person arg) {
-					return arg.firstName;
-				}
-			},
-			new Func<Person, Person>() {
-				@Override
-				public Person invoke(Person arg) {
-					return arg;
-				}
-			}
-		);
-
-		assertThat(actual).hasSize(2);
-		assertThat(actual.getItems("leeloo")).containsExactly(leeloo1, leeloo2);
-		assertThat(actual.getItems("korban")).containsExactly(korban);
 	}
 
 	@Test
@@ -970,6 +894,102 @@ public class TraversableImplTest {
 			Person.withFirstAndLastName("Ruby", "Zorg"),
 			Person.withFirstAndLastName("Ruby", "Rhod"),
 			Person.withFirstAndLastName("Vito", "Cornelius")
+		);
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testZipSameLength() {
+		List<Integer> a = asList(1, 2, 3);
+		List<String> b = asList("a", "b", "c");
+
+		Iterable<Tuple<Integer, String>> actual = from(a).zip(b);
+
+		assertThat(actual).containsExactly(
+			new Tuple<Integer, String>(1, "a"),
+			new Tuple<Integer, String>(2, "b"),
+			new Tuple<Integer, String>(3, "c")
+		);
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testZipLeftIsLongerThanRight() {
+		List<Integer> a = asList(1, 2, 3, 4, 5, 6);
+		List<String> b = asList("a", "b", "c");
+
+		Iterable<Tuple<Integer, String>> actual = from(a).zip(b);
+
+		assertThat(actual).containsExactly(
+			new Tuple<Integer, String>(1, "a"),
+			new Tuple<Integer, String>(2, "b"),
+			new Tuple<Integer, String>(3, "c")
+		);
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testZipLeftIsShorterThanRight() {
+		List<Integer> a = asList(1, 2, 3);
+		List<String> b = asList("a", "b", "c", "d", "e", "f");
+
+		Iterable<Tuple<Integer, String>> actual = from(a).zip(b);
+
+		assertThat(actual).containsExactly(
+			new Tuple<Integer, String>(1, "a"),
+			new Tuple<Integer, String>(2, "b"),
+			new Tuple<Integer, String>(3, "c")
+		);
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testZipAllSameLength() {
+		List<Integer> a = asList(1, 2, 3);
+		List<String> b = asList("a", "b", "c");
+
+		Iterable<Tuple<Integer, String>> actual = from(a).zipAll(b);
+
+		assertThat(actual).containsExactly(
+			new Tuple<Integer, String>(1, "a"),
+			new Tuple<Integer, String>(2, "b"),
+			new Tuple<Integer, String>(3, "c")
+		);
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testZipAllLeftIsLongerThanRight() {
+		List<Integer> a = asList(1, 2, 3, 4, 5, 6);
+		List<String> b = asList("a", "b", "c");
+
+		Iterable<Tuple<Integer, String>> actual = from(a).zipAll(b);
+
+		assertThat(actual).containsExactly(
+			new Tuple<Integer, String>(1, "a"),
+			new Tuple<Integer, String>(2, "b"),
+			new Tuple<Integer, String>(3, "c"),
+			new Tuple<Integer, String>(4, null),
+			new Tuple<Integer, String>(5, null),
+			new Tuple<Integer, String>(6, null)
+		);
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testZipAllLeftIsShorterThanRight() {
+		List<Integer> a = asList(1, 2, 3);
+		List<String> b = asList("a", "b", "c", "d", "e", "f");
+
+		Iterable<Tuple<Integer, String>> actual = from(a).zipAll(b);
+
+		assertThat(actual).containsExactly(
+			new Tuple<Integer, String>(1, "a"),
+			new Tuple<Integer, String>(2, "b"),
+			new Tuple<Integer, String>(3, "c"),
+			new Tuple<Integer, String>(null, "d"),
+			new Tuple<Integer, String>(null, "e"),
+			new Tuple<Integer, String>(null, "f")
 		);
 	}
 }
