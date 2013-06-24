@@ -108,7 +108,7 @@ class OrderedTraversableImpl<TSource, TKey> extends TraversableImpl<TSource> imp
 							}
 						}
 
-						return Integer.compare(a.getIndex(), b.getIndex());
+						return Integer.valueOf(a.getIndex()).compareTo(b.getIndex());
 					}
 				}
 			);
