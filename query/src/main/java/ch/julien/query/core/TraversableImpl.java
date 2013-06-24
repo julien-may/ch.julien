@@ -1,20 +1,21 @@
 package ch.julien.query.core;
 
 import ch.julien.common.contract.Check;
+import ch.julien.common.datastructure.Tuple;
 import ch.julien.common.delegate.*;
 import ch.julien.common.monad.Indexed;
 import ch.julien.common.monad.Option;
-import ch.julien.query.Group;
-import ch.julien.query.Lookup;
 import ch.julien.query.OrderedTraversable;
 import ch.julien.query.Traversable;
 
 import java.util.*;
 
-import static ch.julien.common.util.Comparators.fromEqualityComparator;
-
 class TraversableImpl<TSource> implements Traversable<TSource> {
 	protected final Iterable<TSource> source;
+
+	static <T> TraversableImpl<T> create(Iterable<T> source) {
+		return new TraversableImpl<T>(source);
+	}
 
 	public TraversableImpl(Iterable<TSource> source) {
 		Check.notNull(source, "source");
@@ -199,75 +200,6 @@ class TraversableImpl<TSource> implements Traversable<TSource> {
 	}
 
 	@Override
-	public <TKey> Lookup<TKey, TSource> asLookup(Func<TSource, TKey> keySelector) {
-		return asLookup(keySelector,
-			new Func<TSource, TSource>() {
-				@Override
-				public TSource invoke(TSource element) {
-					return element;
-				}
-			}, null
-		);
-	}
-
-	@Override
-	public <TKey> Lookup<TKey, TSource> asLookup(Func<TSource, TKey> keySelector, EqualityComparator<TKey> equalityComparator) {
-		return asLookup(keySelector,
-			new Func<TSource, TSource>() {
-				@Override
-				public TSource invoke(TSource element) {
-					return element;
-				}
-			}, equalityComparator
-		);
-	}
-
-	@Override
-	public <TKey, TElement> Lookup<TKey, TElement> asLookup(Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector) {
-		return asLookup(keySelector, elementSelector, null);
-	}
-
-	@Override
-	public <TKey, TElement> Lookup<TKey, TElement> asLookup(Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector,
-		EqualityComparator<TKey> equalityComparator) {
-
-		Check.notNull(keySelector, "keySelector");
-		Check.notNull(elementSelector, "elementSelector");
-
-		final Map<Key<TKey>, Group<TKey, TElement>> map = new TreeMap<Key<TKey>, Group<TKey, TElement>>(
-			new KeyComparator<TKey>(equalityComparator)
-		);
-		final List<Key<TKey>> orderedKeys = new ArrayList<Key<TKey>>();
-
-		for (TSource item : source) {
-			TKey key = keySelector.invoke(item);
-
-			GroupImpl<TKey, TElement> group = (GroupImpl<TKey, TElement>)map.get(new Key<TKey>(key));
-			if (group == null) {
-				group = new GroupImpl<TKey, TElement>(key);
-
-				Key<TKey> keyli = new Key<TKey>(group.getKey());
-
-				map.put(keyli, group);
-				orderedKeys.add(keyli);
-			}
-
-			group.add(elementSelector.invoke(item));
-		}
-
-		return new LookupImpl<TKey, TElement>(
-			new Iterable<Group<TKey, TElement>>() {
-				@Override
-				public Iterator<Group<TKey, TElement>> iterator() {
-					return new OrderedGroupIterator<TKey, TElement>(
-						orderedKeys.iterator(), map
-					);
-				}
-			}, map
-		);
-	}
-
-	@Override
 	public Traversable<TSource> concat(final Iterable<? extends TSource> appendant) {
 		Check.notNull(appendant, "appendant");
 
@@ -412,32 +344,53 @@ class TraversableImpl<TSource> implements Traversable<TSource> {
 
 	@Override
 	public Traversable<TSource> intersect(Iterable<? extends TSource> other, final EqualityComparator<TSource> equalityComparator) {
-		final List<TSource> keys = new ArrayList<TSource>();
-		final Map<TSource, Boolean> flags = new TreeMap<TSource, Boolean>(
-			fromEqualityComparator(equalityComparator)
-		);
+		final List<Key<TSource>> keys = new ArrayList<Key<TSource>>();
+		final Map<Key<TSource>, Boolean> flags = new HashMap<Key<TSource>, Boolean>();
 
-		for (TSource item : select(new Predicate<TSource>() {
+		for (Key<TSource> item : map(
+				new Func<TSource, Key<TSource>>() {
+					@Override
+					public Key<TSource> invoke(TSource arg) {
+						return new Key<TSource>(arg, equalityComparator);
+					}
+				}
+			).select(
+			new Predicate<Key<TSource>>() {
 				@Override
-				public boolean invoke(TSource item) {
+				public boolean invoke(Key<TSource> item) {
 					return !flags.containsKey(item);
 				}
-			})) {
+			}
+		)
+		) {
 			flags.put(item, false);
 			keys.add(item);
 		}
 
-		for (TSource item : other) {
+		for (Key<TSource> item : create(other).map(
+			new Func<TSource, Key<TSource>>() {
+				@Override
+				public Key<TSource> invoke(TSource item) {
+					return new Key<TSource>(item, equalityComparator);
+				}
+			}
+		)) {
 			if (flags.containsKey(item)) {
 				flags.put(item, true);
 			}
 		}
 
-		return new TraversableImpl<TSource>(keys).select(
-			new Predicate<TSource>() {
+		return create(keys).select(
+			new Predicate<Key<TSource>>() {
 				@Override
-				public boolean invoke(TSource arg) {
+				public boolean invoke(Key<TSource> arg) {
 					return flags.get(arg);
+				}
+			}).map(
+			new Func<Key<TSource>, TSource>() {
+				@Override
+				public TSource invoke(Key<TSource> arg) {
+					return arg.value;
 				}
 			}
 		);
@@ -582,6 +535,30 @@ class TraversableImpl<TSource> implements Traversable<TSource> {
 	@Override
 	public <TKey> OrderedTraversable<TSource, TKey> sortByDescending(Func<TSource, TKey> keySelector, Comparator<TKey> comparator) {
 		return OrderedTraversableImpl.create(this, keySelector, comparator, true);
+	}
+
+	@Override
+	public <TSourceOther> Traversable<Tuple<TSource, TSourceOther>> zip(final Iterable<TSourceOther> other) {
+		return new TraversableImpl<Tuple<TSource, TSourceOther>>(
+			new Iterable<Tuple<TSource, TSourceOther>>() {
+				@Override
+				public Iterator<Tuple<TSource, TSourceOther>> iterator() {
+					return new ZipIterator<TSource, TSourceOther>(source.iterator(), other.iterator());
+				}
+			}
+		);
+	}
+
+	@Override
+	public <TSourceOther> Traversable<Tuple<TSource, TSourceOther>> zipAll(final Iterable<TSourceOther> other) {
+		return new TraversableImpl<Tuple<TSource, TSourceOther>>(
+			new Iterable<Tuple<TSource, TSourceOther>>() {
+				@Override
+				public Iterator<Tuple<TSource, TSourceOther>> iterator() {
+					return new ZipAllIterator<TSource, TSourceOther>(source.iterator(), other.iterator());
+				}
+			}
+		);
 	}
 
 	@Override
