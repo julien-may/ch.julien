@@ -75,10 +75,10 @@ public class PredicatesTest {
 		assertThat(Predicates.elementOfInstance(TestType.class).invoke(null)).isFalse();
 		assertThat(Predicates.elementOfInstance(TestType.class).invoke(new Object())).isFalse();		// super type
 		assertThat(Predicates.elementOfInstance(TestType.class).invoke("non-parent-object")).isFalse();	// any type
+		assertThat(Predicates.elementOfInstance(TestType.class).invoke(new Object() {})).isFalse();		// any anonymous type
 		assertThat(Predicates.elementOfInstance(TestType.class).invoke(new TestType())).isTrue();		// THE type
 		assertThat(Predicates.elementOfInstance(TestType.class).invoke(new TestSubtype())).isTrue();	// subtype
 		assertThat(Predicates.elementOfInstance(TestType.class).invoke(new TestType() {})).isTrue();	// anonymous subtype
-		assertThat(Predicates.elementOfInstance(TestType.class).invoke(new Object() {})).isTrue();		// any anonymous type
 	}
 	
 	@Test
