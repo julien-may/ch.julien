@@ -2,12 +2,16 @@ package ch.julien.query.util;
 
 import static java.util.Arrays.asList;
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.junit.Assert.*;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
+
+import ch.julien.query.core.Query;
 
 
 public class PredicatesTest {
@@ -60,6 +64,29 @@ public class PredicatesTest {
 		assertThat(Predicates.notEmptyArray().invoke(array2)).isTrue();
 		String[] array3 = {"my object"};	// not null element
 		assertThat(Predicates.notEmptyArray().invoke(array3)).isTrue();
+	}
+	
+	private static class TestType {}
+	private static class TestSubtype extends TestType {}
+	
+	@Test
+	public void testElementOfInstance() {
+		// test basic cases
+		assertThat(Predicates.elementOfInstance(TestType.class).invoke(null)).isFalse();
+		assertThat(Predicates.elementOfInstance(TestType.class).invoke(new Object())).isFalse();		// super type
+		assertThat(Predicates.elementOfInstance(TestType.class).invoke("non-parent-object")).isFalse();	// any type
+		assertThat(Predicates.elementOfInstance(TestType.class).invoke(new TestType())).isTrue();		// THE type
+		assertThat(Predicates.elementOfInstance(TestType.class).invoke(new TestSubtype())).isTrue();	// subtype
+		assertThat(Predicates.elementOfInstance(TestType.class).invoke(new TestType() {})).isTrue();	// anonymous subtype
+		assertThat(Predicates.elementOfInstance(TestType.class).invoke(new Object() {})).isTrue();		// any anonymous type
+	}
+	
+	@Test
+	public void integrationtestElementOfInstanceTo() {
+		List<Object> list = asList(new Object(), "my string");
+		List<String> castedList = Query.from(list).select(Predicates.elementOfInstance(String.class)).map(Funcs.to(String.class)).asArrayList();
+		assertEquals(1, castedList.size());
+		assertEquals(list.get(1), castedList.get(0));
 	}
 
 }

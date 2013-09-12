@@ -42,5 +42,14 @@ public class Predicates {
 			}
 		};
 	}
-
+	
+	public static final Predicate<Object> elementOfInstance(final Class<?> clazz) {
+		return new Predicate<Object>() {
+			@Override
+			public boolean invoke(Object arg) {
+				return clazz.isInstance(arg);
+			}
+		};
+	}
+	
 }
