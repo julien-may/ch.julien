@@ -2,6 +2,8 @@ package ch.julien.query.util;
 
 import static java.util.Arrays.asList;
 import static org.fest.assertions.api.Assertions.assertThat;
+import static ch.julien.query.util.Predicates.all;
+import static ch.julien.query.util.Predicates.none;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -89,20 +91,8 @@ public class PredicatesTest {
 		assertThat(castedList.get(0)).isEqualTo((String) list.get(1));
 	}
 	
-	private Predicate<Object> all = new Predicate<Object>() {
-		@Override
-		public boolean invoke(Object arg) {
-			return true;
-		}
-		public String toString() { return "all"; };
-	};
-	private Predicate<Object> none = new Predicate<Object>() {
-		@Override
-		public boolean invoke(Object arg) {
-			return false;
-		}
-		public String toString() { return "none"; };
-	};
+	Predicate<Object> all = all();
+	Predicate<Object> none = none();
 
 	@Test
 	public void testNot() {

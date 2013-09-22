@@ -1,5 +1,6 @@
 package ch.julien.query.util;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
@@ -54,11 +55,19 @@ public class Predicates {
 		};
 	}
 	
+	public static final <T> ExpressionPredicate<T> that(final Predicate<T> predicate) {
+		return new ExpressionPredicate<T>(predicate);
+	}
+	
 	public static final <T> Predicate<T> not(final Predicate<T> predicate) {
 		return new Predicate<T>() {
 			@Override
 			public boolean invoke(T arg) {
 				return ! predicate.invoke(arg);
+			}
+			@Override
+			public String toString() {
+				return "not[" + predicate.toString() + "]";
 			}
 		};
 	}
@@ -74,6 +83,10 @@ public class Predicates {
 				}
 				return true;
 			}
+			@Override
+			public String toString() {
+				return "and" + Arrays.asList(predicates).toString();
+			}
 		};
 	}
 	
@@ -88,6 +101,10 @@ public class Predicates {
 				}
 				return false;
 			}
+			@Override
+			public String toString() {
+				return "or" + Arrays.asList(predicates).toString();
+			}
 		};
 	}
 	
@@ -101,6 +118,10 @@ public class Predicates {
 						return arg1.invoke(arg);
 					}
 				}).count() == 1;
+			}
+			@Override
+			public String toString() {
+				return "xor" + Arrays.asList(predicates).toString();
 			}
 		};
 	}
@@ -137,6 +158,36 @@ public class Predicates {
 			@Override
 			public boolean invoke(String arg) {
 				return arg != null && arg.matches(regex);
+			}
+		};
+	}
+	
+	/*
+	 * Predicates only useful for testing
+	 */
+	
+	static final Predicate<Object> all() {
+		return new Predicate<Object>() {
+			@Override
+			public boolean invoke(Object arg) {
+				return true;
+			}
+			@Override
+			public String toString() {
+				return "all";
+			}
+		};
+	}
+	
+	static final Predicate<Object> none() {
+		return new Predicate<Object>() {
+			@Override
+			public boolean invoke(Object arg) {
+				return false;
+			}
+			@Override
+			public String toString() {
+				return "none";
 			}
 		};
 	}
