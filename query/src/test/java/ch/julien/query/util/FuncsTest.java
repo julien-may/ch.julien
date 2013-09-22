@@ -47,4 +47,26 @@ public class FuncsTest {
 		TestType var = Funcs.to(TestType.class).invoke("instance of unrelated type");
 	}
 	
+	@Test
+	public void testReplaceAll() {
+		assertThat(Funcs.replaceAll("regex", "replacement").invoke("")).isEqualTo("");
+		assertThat(Funcs.replaceAll("regex", "replacement").invoke("no match")).isEqualTo("no match");
+		assertThat(Funcs.replaceAll("regex", "replacement").invoke("regex and shit")).isEqualTo("replacement and shit");
+	}
+	
+	@Test(expected=NullPointerException.class)
+	public void testReplaceAll_Exception1() {
+		Funcs.replaceAll("regex", "replacement").invoke(null);
+	}
+	
+	@Test
+	public void testParseInteger() {
+		assertThat(Funcs.parseInteger().invoke("1")).isEqualTo(1);
+	}
+	
+	@Test
+	public void testParseDouble() {
+		assertThat(Funcs.parseDouble().invoke("1.2")).isEqualTo(1.2);
+	}
+	
 }
