@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.Map;
 
 import ch.julien.common.delegate.Predicate;
+import ch.julien.query.core.Query;
+
 
 public class Predicates {
 	
@@ -48,6 +50,93 @@ public class Predicates {
 			@Override
 			public boolean invoke(Object arg) {
 				return clazz.isInstance(arg);
+			}
+		};
+	}
+	
+	public static final <T> Predicate<T> not(final Predicate<T> predicate) {
+		return new Predicate<T>() {
+			@Override
+			public boolean invoke(T arg) {
+				return ! predicate.invoke(arg);
+			}
+		};
+	}
+	
+	public static final <T> Predicate<T> and(final Predicate<T>... predicates) {
+		return new Predicate<T>() {
+			@Override
+			public boolean invoke(T arg) {
+				for (Predicate<T> predicate : predicates) {
+					if ( ! predicate.invoke(arg)) {
+						return false;
+					}
+				}
+				return true;
+			}
+		};
+	}
+	
+	public static final <T> Predicate<T> or(final Predicate<T>... predicates) {
+		return new Predicate<T>() {
+			@Override
+			public boolean invoke(T arg) {
+				for (Predicate<T> predicate : predicates) {
+					if (predicate.invoke(arg)) {
+						return true;
+					}
+				}
+				return false;
+			}
+		};
+	}
+	
+	public static final <T> Predicate<T> xor(final Predicate<T>... predicates) {
+		return new Predicate<T>() {
+			@Override
+			public boolean invoke(final T arg) {
+				return Query.from(predicates).select(new Predicate<Predicate<T>>() {
+					@Override
+					public boolean invoke(Predicate<T> arg1) {
+						return arg1.invoke(arg);
+					}
+				}).count() == 1;
+			}
+		};
+	}
+	
+	public static final Predicate<String> notEmptyString() {
+		return new Predicate<String>() {
+			@Override
+			public boolean invoke(String arg) {
+				return arg != null && ! arg.isEmpty();
+			}
+		};
+	}
+	
+	public static final Predicate<String> stringStartingWith(final String prefix) {
+		return new Predicate<String>() {
+			@Override
+			public boolean invoke(String arg) {
+				return arg != null && arg.startsWith(prefix);
+			}
+		};
+	}
+	
+	public static final Predicate<String> stringEndingWith(final String suffix) {
+		return new Predicate<String>() {
+			@Override
+			public boolean invoke(String arg) {
+				return arg != null && arg.endsWith(suffix);
+			}
+		};
+	}
+	
+	public static final Predicate<String> stringMatching(final String regex) {
+		return new Predicate<String>() {
+			@Override
+			public boolean invoke(String arg) {
+				return arg != null && arg.matches(regex);
 			}
 		};
 	}

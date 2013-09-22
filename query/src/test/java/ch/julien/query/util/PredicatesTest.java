@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import ch.julien.common.delegate.Predicate;
 import ch.julien.query.core.Query;
 
 
@@ -87,5 +88,91 @@ public class PredicatesTest {
 		assertThat(castedList.size()).isEqualTo(1);
 		assertThat(castedList.get(0)).isEqualTo((String) list.get(1));
 	}
+	
+	private Predicate<Object> all = new Predicate<Object>() {
+		@Override
+		public boolean invoke(Object arg) {
+			return true;
+		}
+		public String toString() { return "all"; };
+	};
+	private Predicate<Object> none = new Predicate<Object>() {
+		@Override
+		public boolean invoke(Object arg) {
+			return false;
+		}
+		public String toString() { return "none"; };
+	};
 
+	@Test
+	public void testNot() {
+		assertThat(Predicates.not(all).invoke(null)).isFalse();
+		assertThat(Predicates.not(none).invoke(null)).isTrue();
+	}
+	
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testAnd() {
+		assertThat(Predicates.and(all, all).invoke(null)).isTrue();
+		assertThat(Predicates.and(all, none).invoke(null)).isFalse();
+		assertThat(Predicates.and(none, all).invoke(null)).isFalse();
+		assertThat(Predicates.and(none, none).invoke(null)).isFalse();
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testOr() {
+		assertThat(Predicates.or(all, all).invoke(null)).isTrue();
+		assertThat(Predicates.or(all, none).invoke(null)).isTrue();
+		assertThat(Predicates.or(none, all).invoke(null)).isTrue();
+		assertThat(Predicates.or(none, none).invoke(null)).isFalse();
+	}
+	
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testXor() {
+		assertThat(Predicates.xor(all, all).invoke(null)).isFalse();
+		assertThat(Predicates.xor(all, none).invoke(null)).isTrue();
+		assertThat(Predicates.xor(none, all).invoke(null)).isTrue();
+		assertThat(Predicates.xor(none, none).invoke(null)).isFalse();
+	}
+	
+	@Test
+	public void testNotEmptyString() {
+		assertThat(Predicates.notEmptyString().invoke(null)).isFalse();
+		assertThat(Predicates.notEmptyString().invoke("")).isFalse();
+		assertThat(Predicates.notEmptyString().invoke("not empty")).isTrue();
+	}
+	
+	@Test
+	public void testStringStartingWith() {
+		assertThat(Predicates.stringStartingWith("prefix").invoke(null)).isFalse();
+		assertThat(Predicates.stringStartingWith("prefix").invoke("")).isFalse();
+		assertThat(Predicates.stringStartingWith("prefix").invoke("suffix")).isFalse();
+		assertThat(Predicates.stringStartingWith("prefix").invoke("prefix")).isTrue();
+		assertThat(Predicates.stringStartingWith("prefix").invoke(" prefix")).isFalse();
+		assertThat(Predicates.stringStartingWith("prefix").invoke("prefix-suffix")).isTrue();
+	}
+	
+	@Test
+	public void testStringEndingWith() {
+		assertThat(Predicates.stringEndingWith("suffix").invoke(null)).isFalse();
+		assertThat(Predicates.stringEndingWith("suffix").invoke("")).isFalse();
+		assertThat(Predicates.stringEndingWith("suffix").invoke("prefix")).isFalse();
+		assertThat(Predicates.stringEndingWith("suffix").invoke("suffix")).isTrue();
+		assertThat(Predicates.stringEndingWith("suffix").invoke("suffix ")).isFalse();
+		assertThat(Predicates.stringEndingWith("suffix").invoke("prefix-suffix")).isTrue();
+	}
+	
+	@Test
+	public void testStringMatching() {
+		assertThat(Predicates.stringMatching("^.[ab]{1}$").invoke(null)).isFalse();
+		assertThat(Predicates.stringMatching("^.[ab]{1}$").invoke("")).isFalse();
+		assertThat(Predicates.stringMatching("^.[ab]{1}$").invoke("a")).isFalse();
+		assertThat(Predicates.stringMatching("^.[ab]{1}$").invoke(" a")).isTrue();
+		assertThat(Predicates.stringMatching("^.[ab]{1}$").invoke(" a ")).isFalse();
+		assertThat(Predicates.stringMatching("^.[ab]{1}$").invoke(" b")).isTrue();
+		assertThat(Predicates.stringMatching("^.[ab]{1}$").invoke(" c")).isFalse();
+	}
+	
 }
