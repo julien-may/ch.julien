@@ -20,7 +20,7 @@ public class Predicates {
 		return new Predicate<Collection<?>>() {
 			@Override
 			public boolean invoke(Collection<?> arg) {
-				return arg != null && !arg.isEmpty();
+				return arg != null && ! arg.isEmpty();
 			}
 		};
 	}
@@ -29,7 +29,7 @@ public class Predicates {
 		return new Predicate<Map<?,?>>() {
 			@Override
 			public boolean invoke(Map<?, ?> arg) {
-				return arg != null && !arg.isEmpty();
+				return arg != null && ! arg.isEmpty();
 			}
 		};
 	}

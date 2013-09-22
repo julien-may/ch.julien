@@ -12,7 +12,7 @@ public class FuncsTest {
 
 	@Test
 	public void testTo() {
-		// implicitly assert absence of class cast exceptions!
+		// implicitly assert absence of class cast exceptions when assigning to var!
 		TestType var;
 		
 		// same type
@@ -34,17 +34,17 @@ public class FuncsTest {
 	}
 	
 	@Test(expected=ClassCastException.class)
-	public void testTo_Exception1() throws Exception {
+	public void testTo_Exception1() {
 		// supertype
 		@SuppressWarnings("unused")	// no exception without assignment
 		TestType var = Funcs.to(TestType.class).invoke(new Object());
 	}
 	
 	@Test(expected=ClassCastException.class)
-	public void testTo_Exception2() throws Exception {
+	public void testTo_Exception2() {
 		// unrelated type
 		@SuppressWarnings("unused")	// no exception without assignment
 		TestType var = Funcs.to(TestType.class).invoke("instance of unrelated type");
 	}
-
+	
 }
