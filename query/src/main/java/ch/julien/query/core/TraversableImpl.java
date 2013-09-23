@@ -223,7 +223,7 @@ class TraversableImpl<TSource> implements Traversable<TSource> {
 	@Override
 	public long count() {
 		return source instanceof Collection
-			? ((Collection)source).size()
+			? ((Collection<?>) source).size()
 			: aggregate(0, new Accumulator<Integer, TSource>() {
 				@Override
 				public Integer accumulate(Integer count, TSource item) {

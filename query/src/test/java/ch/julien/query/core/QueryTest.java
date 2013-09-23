@@ -1,17 +1,14 @@
 package ch.julien.query.core;
 
-import ch.julien.common.delegate.Predicate;
 import ch.julien.query.Traversable;
+
 import org.junit.Test;
 
-import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 
-import static ch.julien.query.core.Query.from;
 import static java.util.Arrays.asList;
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.fest.assertions.api.Assertions.entry;
 
 public class QueryTest {
 	@Test
@@ -22,6 +19,7 @@ public class QueryTest {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void testFromMap() {
 		Map<Integer, String> map = new HashMap<Integer, String>();
 		map.put(1, "leeloo");
@@ -116,7 +114,7 @@ public class QueryTest {
 	}
 
 	// elegant way to suppress generic array creation warning
-	private <TA, TB> Map.Entry entry(TA a, TB b) {
+	private <TA, TB> Map.Entry<TA, TB> entry(TA a, TB b) {
 		return new HashMap.SimpleEntry<TA, TB>(a, b);
 	}
 }

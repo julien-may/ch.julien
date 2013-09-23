@@ -6,6 +6,7 @@ import ch.julien.common.delegate.EqualityComparator;
 import ch.julien.common.delegate.Func;
 import ch.julien.common.delegate.Predicate;
 import ch.julien.common.monad.Option;
+
 import org.junit.Test;
 
 import java.util.*;
@@ -394,6 +395,7 @@ public class TraversableImplTest {
 
 	@Test
 	public void testCountUsesSizeFromCollection() {
+		@SuppressWarnings("serial")
 		Collection<Integer> integers = new ArrayList<Integer>() {
 			@Override
 			public int size() {
@@ -642,6 +644,7 @@ public class TraversableImplTest {
 			Boolean.toString(false), Boolean.toString(true), Boolean.toString(false), Boolean.toString(true));
 	}
 
+	@SuppressWarnings("serial")
 	class MockedArrayList<E> extends ArrayList<E> {
 		class Counter {
 			private int count = 0;
@@ -712,7 +715,7 @@ public class TraversableImplTest {
 
 		assertThat(integers.getCallCount()).isZero();
 
-		for (String ignored : actual) {}
+		for (@SuppressWarnings("unused") String ignored : actual) {}
 
 		assertThat(integers.getCallCount()).isEqualTo(4);
 	}
