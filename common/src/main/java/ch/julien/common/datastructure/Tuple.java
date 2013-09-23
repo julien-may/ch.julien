@@ -27,7 +27,7 @@ public class Tuple<TFirst, TSecond> {
 			return false;
 		}
 
-		Tuple tuple = (Tuple) other;
+		Tuple<?, ?> tuple = (Tuple<?, ?>) other;
 
 		return !(first != null ? !first.equals(tuple.first) : tuple.first != null)
 			&& !(second != null ? !second.equals(tuple.second) : tuple.second != null);
