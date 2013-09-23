@@ -23,6 +23,15 @@ public class Funcs {
 		};
 	}
 	
+	public static final Func<String, String> trimString() {
+		return new Func<String, String>() {
+			@Override
+			public String invoke(String arg) {
+				return arg.trim();
+			}
+		};
+	}
+	
 	public static final Func<String, Integer> parseInteger() {
 		return new Func<String, Integer>() {
 			@Override

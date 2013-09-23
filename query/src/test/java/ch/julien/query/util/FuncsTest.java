@@ -60,6 +60,21 @@ public class FuncsTest {
 	}
 	
 	@Test
+	public void testTrimString() {
+		assertThat(Funcs.trimString().invoke("")).isEqualTo("");
+		assertThat(Funcs.trimString().invoke(" ")).isEqualTo("");
+		assertThat(Funcs.trimString().invoke("\t")).isEqualTo("");
+		assertThat(Funcs.trimString().invoke("a a")).isEqualTo("a a");
+		assertThat(Funcs.trimString().invoke(" a a")).isEqualTo("a a");
+		assertThat(Funcs.trimString().invoke("a a ")).isEqualTo("a a");
+	}
+	
+	@Test(expected=NullPointerException.class)
+	public void testTrimString_Exception1() {
+		Funcs.trimString().invoke(null);
+	}
+	
+	@Test
 	public void testParseInteger() {
 		assertThat(Funcs.parseInteger().invoke("1")).isEqualTo(1);
 	}
