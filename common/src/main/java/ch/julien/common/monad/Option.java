@@ -11,14 +11,6 @@ public abstract class Option<T> {
 		return new Some<T>(value);
 	}
 
-	public static <T> Option<T> option(T value) {
-		if (value == null) {
-			return none();
-		}
-
-		return some(value);
-	}
-
 	private Option() {}
 
 	public abstract Boolean hasValue();
@@ -44,27 +36,23 @@ public abstract class Option<T> {
 
 		@Override
 		public T get() {
-			throw new UnsupportedOperationException();
+			throw new UnsupportedOperationException("Cannot resolve value on None.");
 		}
 
 		@Override
 		public T getOrElse(T value) {
-			Check.notNull(value, "value");
-
 			return value;
 		}
 
 		@Override
 		@SuppressWarnings("unchecked")
 		public Option<T> or(Option<? extends T> other) {
-			Check.notNull(other, "other");
-
 			return (Option<T>)other;
 		}
 
 		@Override
 		public Option<T> orOption(T other) {
-			return option(other);
+			return some(other);
 		}
 	}
 
@@ -87,15 +75,11 @@ public abstract class Option<T> {
 
 		@Override
 		public T getOrElse(T value) {
-			Check.notNull(value, "value");
-
 			return get();
 		}
 
 		@Override
 		public Option<T> or(Option<? extends T> other) {
-			Check.notNull(value, "other");
-
 			return this;
 		}
 
