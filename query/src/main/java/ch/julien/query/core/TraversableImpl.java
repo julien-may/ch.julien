@@ -538,6 +538,16 @@ class TraversableImpl<TSource> implements Traversable<TSource> {
 	}
 
 	@Override
+	public Traversable<TSource> union(Iterable<? extends TSource> appendant) {
+		return concat(appendant).distinct();
+	}
+
+	@Override
+	public Traversable<TSource> union(TSource[] appendant) {
+		return union(new TraversableImpl<TSource>(appendant));
+	}
+
+	@Override
 	public <TSourceOther> Traversable<Tuple<TSource, TSourceOther>> zip(final Iterable<TSourceOther> other) {
 		return new TraversableImpl<Tuple<TSource, TSourceOther>>(
 			new Iterable<Tuple<TSource, TSourceOther>>() {

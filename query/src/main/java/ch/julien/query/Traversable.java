@@ -67,6 +67,9 @@ public interface Traversable<T> extends Iterable<T> {
 	<TKey> OrderedTraversable<T, TKey> sortByDescending(Func<T, TKey> keySelector);
 	<TKey> OrderedTraversable<T, TKey> sortByDescending(Func<T, TKey> keySelector, Comparator<TKey> comparator);
 
+	Traversable<T> union(Iterable<? extends T> appendant);
+	Traversable<T> union(T[] appendant);
+
 	<TOther> Traversable<Tuple<T, TOther>> zip(Iterable<TOther> other);
 	<TOther> Traversable<Tuple<T, TOther>> zipAll(Iterable<TOther> other);
 }
