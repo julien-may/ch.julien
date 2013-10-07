@@ -29,6 +29,14 @@ public interface Traversable<T> extends Iterable<T> {
 	HashSet<T> asHashSet();
 	<TKey> HashSet<TKey> asHashSet(Func<T, TKey> keySelector);
 
+	LinkedList<T> asLinkedList();
+
+	<TKey> LinkedHashMap<TKey, T> asLinkedHashMap(Func<T, TKey> keySelector);
+	<TKey, TElement> LinkedHashMap<TKey, TElement> asLinkedHashMap(Func<T, TKey> keySelector, Func<T, TElement> elementSelector);
+
+	LinkedHashSet<T> asLinkedHashSet();
+	<TKey> LinkedHashSet<TKey> asLinkedHashSet(Func<T, TKey> keySelector);
+
 	Traversable<T> concat(Iterable<? extends T> appendant);
 	Traversable<T> concat(T[] appendant);
 

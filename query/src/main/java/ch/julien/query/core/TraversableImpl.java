@@ -177,13 +177,14 @@ class TraversableImpl<TSource> implements Traversable<TSource> {
 
 	@Override
 	public HashSet<TSource> asHashSet() {
-		HashSet<TSource> set = new HashSet<TSource>();
-
-		for (TSource item : source) {
-			set.add(item);
-		}
-
-		return set;
+		return asHashSet(
+			new Func<TSource, TSource>() {
+				@Override
+				public TSource invoke(TSource element) {
+					return element;
+				}
+			}
+		);
 	}
 
 	@Override
@@ -191,6 +192,68 @@ class TraversableImpl<TSource> implements Traversable<TSource> {
 		Check.notNull(keySelector, "keySelector");
 
 		HashSet<TKey> set = new HashSet<TKey>();
+
+		for (TSource item : source) {
+			set.add(keySelector.invoke(item));
+		}
+
+		return set;
+	}
+
+	@Override
+	public LinkedList<TSource> asLinkedList() {
+		LinkedList<TSource> list = new LinkedList<TSource>();
+
+		for (TSource item : this.source) {
+			list.add(item);
+		}
+
+		return list;
+	}
+
+	@Override
+	public <TKey> LinkedHashMap<TKey, TSource> asLinkedHashMap(Func<TSource, TKey> keySelector) {
+		return asLinkedHashMap(keySelector,
+			new Func<TSource, TSource>() {
+				@Override
+				public TSource invoke(TSource element) {
+					return element;
+				}
+			}
+		);
+	}
+
+	@Override
+	public <TKey, TElement> LinkedHashMap<TKey, TElement> asLinkedHashMap(Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector) {
+		Check.notNull(keySelector, "keySelector");
+		Check.notNull(elementSelector, "elementSelector");
+
+		LinkedHashMap<TKey, TElement> map = new LinkedHashMap<TKey, TElement>();
+
+		for (TSource item : source) {
+			map.put(keySelector.invoke(item), elementSelector.invoke(item));
+		}
+
+		return map;
+	}
+
+	@Override
+	public LinkedHashSet<TSource> asLinkedHashSet() {
+		return asLinkedHashSet(
+			new Func<TSource, TSource>() {
+				@Override
+				public TSource invoke(TSource element) {
+					return element;
+				}
+			}
+		);
+	}
+
+	@Override
+	public <TKey> LinkedHashSet<TKey> asLinkedHashSet(Func<TSource, TKey> keySelector) {
+		Check.notNull(keySelector, "keySelector");
+
+		LinkedHashSet<TKey> set = new LinkedHashSet<TKey>();
 
 		for (TSource item : source) {
 			set.add(keySelector.invoke(item));
